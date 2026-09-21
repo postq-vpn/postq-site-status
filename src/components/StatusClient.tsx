@@ -57,7 +57,7 @@ function mockIncidents(): Incident[] {
   return [
     { name: '🇳🇱 Нидерланды', subdomain: '?', startAt: now - 2 * 24 * 60 * 60 * 1000, endAt: now - 2 * 24 * 60 * 60 * 1000 + 25 * 60 * 1000, durationMs: 25 * 60 * 1000 },
     { name: '🌐 Личный кабинет', subdomain: '', startAt: now - 2 * 24 * 60 * 60 * 1000 - 60 * 60 * 1000, endAt: now - 2 * 24 * 60 * 60 * 1000 - 50 * 60 * 1000, durationMs: 10 * 60 * 1000 },
-    { name: '🇷🇺 Россия #3', subdomain: 'pl1', startAt: now - 9 * 24 * 60 * 60 * 1000, endAt: now - 9 * 24 * 60 * 60 * 1000 + 70 * 60 * 1000, durationMs: 70 * 60 * 1000 },
+    { name: '🇷🇺 Россия #3', subdomain: 'ru3', startAt: now - 9 * 24 * 60 * 60 * 1000, endAt: now - 9 * 24 * 60 * 60 * 1000 + 70 * 60 * 1000, durationMs: 70 * 60 * 1000 },
   ]
 }
 
@@ -80,9 +80,11 @@ export default function StatusClient({ initialServers, initialServices = [] }: P
         { name: '🇫🇮 Финляндия', protocol: 'vless', alive: true, latency: 298, subdomain: 'fi1' },
         { name: '🇳🇱 Нидерланды', protocol: 'vless', alive: false, latency: 0, subdomain: '?' },
         { name: '🇵🇱 Польша', protocol: 'vless', alive: true, latency: 387, subdomain: 'pl1' },
-        { name: '🇷🇺 Россия #1', protocol: 'vless', alive: true, latency: 440, subdomain: 'de3' },
-        { name: '🇷🇺 Россия #2', protocol: 'vless', alive: true, latency: 402, subdomain: 'nl6' },
-        { name: '🇷🇺 Россия #3', protocol: 'vless', alive: false, latency: 0, subdomain: 'pl1' },
+        { name: '🇷🇺 Россия #1', protocol: 'vless', alive: true, latency: 440, subdomain: 'ru1' },
+        { name: '🇷🇺 Россия #2', protocol: 'vless', alive: true, latency: 402, subdomain: 'ru2' },
+        { name: '🇷🇺 Россия #3', protocol: 'vless', alive: false, latency: 0, subdomain: 'ru3' },
+        { name: '🇷🇺 Россия #4', protocol: 'vless', alive: true, latency: 425, subdomain: 'ru4' },
+        { name: '🇷🇺 Россия #5', protocol: 'vless', alive: true, latency: 488, subdomain: 'ru5' },
       ]
       setServers(mockServers)
       setHistory(mockHistory([...mockServers.map((s) => s.name), ...initialServices.map((s) => s.name)]))

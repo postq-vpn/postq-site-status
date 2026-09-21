@@ -10,6 +10,12 @@ export interface ServerStatus {
 
 const IPV4_RE = /^\d{1,3}(\.\d{1,3}){3}$/
 
+/** Hosts that are in the subscription but deliberately left off the status
+ *  page (and out of the sampler, the public /api/status counts and incidents). */
+export function isHiddenServer(name: string): boolean {
+  return name.includes('Обратный VPN')
+}
+
 function extractSubdomain(server: unknown): string {
   if (typeof server !== 'string' || server.length === 0) return '?'
   if (IPV4_RE.test(server) || server.includes(':')) return '?' // IPv4 or IPv6 literal
@@ -47,7 +53,7 @@ export async function fetchXrayServers(fetchInit: RequestInit = { cache: 'no-sto
     })
     if (!res.ok) throw new Error(`xray-checker returned ${res.status}`)
     const json = await res.json()
-    return normalize(json.data ?? json)
+    return normalize(json.data ?? json).filter((s) => !isHiddenServer(s.name))
   } catch (err) {
     console.error('[xray]', err)
     return []

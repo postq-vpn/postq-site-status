@@ -3,12 +3,29 @@ import type { ServerStatus } from '../../app/api/status/route'
 
 // xray-checker can't reach these servers because Beeline CDN blocks non-Russian IPs.
 // We check their origin servers directly via TLS handshake instead.
-const CDN_ORIGIN_MAP: Record<string, string> = {
-  'Россия #1': 'de3.postq.space',
-  'Россия #2': 'se4.postq.space',
-  'Россия #3': 'pl1.postq.space',
-  'Россия #4': 'de2.postq.space',
-  'Россия #5': 'de4.postq.space',
+// Keyed by the "#N" in the host remark ("🇷🇺 Россия #N | БС") — must be kept in
+// sync with RemnaWave's host list whenever hosts are renumbered or re-pointed.
+// Can't be derived from the xray-checker response: #1's address is a raw IP
+// (the CDN hostname only lives in its SNI, which /api/v1/proxies doesn't expose).
+const CDN_ORIGIN_MAP: Record<number, string> = {
+  1: 'se4.postq.space', // 188.72.103.3, SNI cdn-se4.postq.space
+  2: 'pl1.postq.space', // cdn-pl1.postq.space
+  3: 'de2.postq.space', // cdn-de2.postq.space
+  4: 'de4.postq.space', // cdn-de4.postq.space
+  5: 'se3.postq.space', // cdn-se3.postq.space
+}
+
+function cdnNumber(name: string): number | null {
+  const match = name.match(/Россия #(\d+)/)
+  return match ? Number(match[1]) : null
+}
+
+/** Display label for a Russia CDN server ("ru1", "ru2", …), or null for any
+ *  other server. Shown instead of the host's own subdomain so the status page
+ *  doesn't reveal which origin backs which Russia entry. */
+export function cdnLabel(name: string): string | null {
+  const n = cdnNumber(name)
+  return n === null ? null : `ru${n}`
 }
 
 function checkTlsConnect(hostname: string): Promise<{ alive: boolean; latency: number }> {
@@ -25,20 +42,16 @@ function checkTlsConnect(hostname: string): Promise<{ alive: boolean; latency: n
 }
 
 export async function overrideCdnServers(servers: ServerStatus[]): Promise<void> {
-  const targets = servers.filter((s) =>
-    Object.keys(CDN_ORIGIN_MAP).some((key) => s.name.includes(key))
-  )
-  if (targets.length === 0) return
-
-  const results = await Promise.all(
-    targets.map((s) => {
-      const key = Object.keys(CDN_ORIGIN_MAP).find((k) => s.name.includes(k))!
-      return checkTlsConnect(CDN_ORIGIN_MAP[key]).then((r) => ({ name: s.name, ...r }))
+  await Promise.all(
+    servers.map(async (server) => {
+      const n = cdnNumber(server.name)
+      if (n === null) return
+      server.subdomain = `ru${n}`
+      const origin = CDN_ORIGIN_MAP[n]
+      if (!origin) return
+      const r = await checkTlsConnect(origin)
+      server.alive = r.alive
+      server.latency = r.latency
     })
   )
-
-  for (const server of servers) {
-    const r = results.find((x) => x.name === server.name)
-    if (r) { server.alive = r.alive; server.latency = r.latency }
-  }
 }
