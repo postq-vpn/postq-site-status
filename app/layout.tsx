@@ -9,12 +9,14 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://status.postq.space'),
   title: 'PostqVPN | статус серверов',
   description: 'Мониторинг состояния VPN-серверов PostqVPN в реальном времени',
+  // Same icon set as the cabinet (bedolaga-cabinet public/brand). The SVG is
+  // declared last so browsers pick it for the tab: the bare logo mark.
   icons: {
     icon: [
-      { url: '/icons/icon.svg?v=2', type: 'image/svg+xml' },
-      { url: '/icons/icon-32.png?v=2', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/favicon-64.png?v=3', sizes: '64x64', type: 'image/png' },
+      { url: '/icons/favicon.svg?v=3', type: 'image/svg+xml' },
     ],
-    apple: '/icons/apple-touch-icon.png?v=2',
+    apple: '/icons/apple-touch-icon.png?v=3',
   },
   openGraph: {
     title: 'PostqVPN | статус серверов',
