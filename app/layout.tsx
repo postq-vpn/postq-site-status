@@ -6,14 +6,30 @@ import RdHeader from '@/components/RdHeader'
 import RdFooter from '@/components/RdFooter'
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://status.postq.space'),
   title: 'postq vpn | статус серверов',
   description: 'Мониторинг состояния VPN-серверов postq в реальном времени',
-  icons: { icon: '/icons/icon.svg' },
+  icons: {
+    icon: [
+      { url: '/icons/icon.svg?v=2', type: 'image/svg+xml' },
+      { url: '/icons/icon-32.png?v=2', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: '/icons/apple-touch-icon.png?v=2',
+  },
   openGraph: {
     title: 'postq vpn | статус серверов',
     description: 'Мониторинг состояния VPN-серверов postq в реальном времени',
     url: 'https://status.postq.space',
     siteName: 'postq vpn status',
+    locale: 'ru_RU',
+    type: 'website',
+    images: [{ url: 'https://status.postq.space/og-image.png?v=2', width: 1200, height: 630, alt: 'Статус серверов PostqVPN' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'postq vpn | статус серверов',
+    description: 'Мониторинг состояния VPN-серверов postq в реальном времени',
+    images: ['https://status.postq.space/og-image.png?v=2'],
   },
 }
 
