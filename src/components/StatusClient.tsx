@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
 import ServerCard from './ServerCard'
 import ServerGroup from './ServerGroup'
 import IncidentHistory from './IncidentHistory'
-import Footer from './Footer'
+import type { Tone } from './StatusBadge'
+import { CircleCheck, CircleX, LoaderCircle, TriangleAlert } from 'lucide-react'
 import type { ServerStatus } from '../../app/api/status/route'
 import type { HistoryByName, DayStatus, Incident } from '../lib/history-db'
 import { cleanBaseName } from '../lib/format'
@@ -59,6 +59,12 @@ function mockIncidents(): Incident[] {
     { name: '🌐 Личный кабинет', subdomain: '', startAt: now - 2 * 24 * 60 * 60 * 1000 - 60 * 60 * 1000, endAt: now - 2 * 24 * 60 * 60 * 1000 - 50 * 60 * 1000, durationMs: 10 * 60 * 1000 },
     { name: '🇷🇺 Россия #3', subdomain: 'ru3', startAt: now - 9 * 24 * 60 * 60 * 1000, endAt: now - 9 * 24 * 60 * 60 * 1000 + 70 * 60 * 1000, durationMs: 70 * 60 * 1000 },
   ]
+}
+
+const TONE_ICON_BG: Record<Tone, string> = {
+  ok: 'bg-[var(--st-ok-bg)] text-[var(--st-ok)]',
+  warn: 'bg-[var(--st-warn-bg)] text-[var(--st-warn)]',
+  bad: 'bg-[var(--st-bad-bg)] text-[var(--st-bad)]',
 }
 
 export default function StatusClient({ initialServers, initialServices = [] }: Props) {
@@ -136,68 +142,57 @@ export default function StatusClient({ initialServers, initialServices = [] }: P
   const allOffline = total > 0 && online === 0
   const loading = total === 0
 
+  const tone: Tone = allOnline ? 'ok' : allOffline ? 'bad' : 'warn'
+  const StatusIcon = tone === 'ok' ? CircleCheck : tone === 'warn' ? TriangleAlert : CircleX
   const statusHeadline = loading
-    ? 'загружаем данные...'
+    ? 'Загружаем данные…'
     : allOnline ? 'Всё работает'
     : allOffline ? 'Ничего не работает :('
     : 'Что-то не работает'
 
   return (
-    <>
-    <div style={{ position: 'relative', zIndex: 1, maxWidth: '720px', margin: '0 auto', padding: '7rem 24px 0' }}>
-      <motion.div
-        initial={{ opacity: 0, y: 22 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.85, delay: 0.2 }}
-        style={{ marginBottom: '40px' }}
-      >
-        <h1 className="page-hero-title">
-          {statusHeadline}
-        </h1>
-        <div style={{ fontFamily: "'GT Eesti Pro Text', system-ui, sans-serif", fontSize: '13px', color: 'var(--text2)' }}>
-          {!loading && <>{online} / {total} онлайн, </>}
-          обновлено {now} МСК
-        </div>
-      </motion.div>
+    <main className="rd-container rd-main">
+      <div className="mx-auto flex w-full max-w-[1008px] flex-col gap-(--rd-space-section)">
+        <section className="rd-card flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-8 lg:px-16">
+          <span aria-hidden className={`flex size-16 shrink-0 items-center justify-center rounded-full lg:size-20 ${loading ? 'bg-[var(--rd-chip)] text-[var(--rd-placeholder)]' : TONE_ICON_BG[tone]}`}>
+            {loading ? <LoaderCircle className="size-8 animate-spin lg:size-10" /> : <StatusIcon className="size-8 lg:size-10" strokeWidth={2} />}
+          </span>
+          <div className="flex flex-col gap-(--rd-space-title)">
+            <h1 className="rd-h3 text-[var(--rd-heading)]">{statusHeadline}</h1>
+            <p className="rd-p-lg text-[var(--rd-caption)]">
+              {!loading && <>{online} из {total} серверов онлайн · </>}обновлено {now} МСК
+            </p>
+          </div>
+        </section>
 
-      {servers.length > 0 ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '56px' }}>
-          {services.length > 0 && (
-            <div>
-              <h2 className="font-display" style={{ fontSize: 'clamp(1.4rem, 2.5vw, 1.75rem)', fontWeight: 700, color: 'var(--text)', margin: '0 0 20px' }}>
-                Инфраструктура
-              </h2>
-              <div className="server-card divided-list">
-                {services.map((svc, i) => <ServerCard key={i} {...svc} history={history[svc.name]} />)}
-              </div>
-            </div>
-          )}
-          {servers.length > 0 && (
-            <div>
-              <h2 className="font-display" style={{ fontSize: 'clamp(1.4rem, 2.5vw, 1.75rem)', fontWeight: 700, color: 'var(--text)', margin: '0 0 20px' }}>
-                VPN серверы
-              </h2>
-              <div className="server-card divided-list">
+        {servers.length > 0 ? (
+          <>
+            {services.length > 0 && (
+              <section className="flex flex-col gap-(--rd-space-group)">
+                <h2 className="rd-h4 text-[var(--rd-heading)]">Инфраструктура</h2>
+                <div className="divide-y divide-[var(--rd-divider)] rounded-[var(--rd-radius-md)] bg-[var(--rd-surface)]">
+                  {services.map((svc, i) => <ServerCard key={i} {...svc} history={history[svc.name]} />)}
+                </div>
+              </section>
+            )}
+            <section className="flex flex-col gap-(--rd-space-group)">
+              <h2 className="rd-h4 text-[var(--rd-heading)]">VPN-серверы</h2>
+              <div className="divide-y divide-[var(--rd-divider)] rounded-[var(--rd-radius-md)] bg-[var(--rd-surface)]">
                 {groupByLocation(servers).map(([base, group]) =>
                   group.length > 1
                     ? <ServerGroup key={base} baseName={base} servers={group} history={history} />
                     : <ServerCard key={base} {...group[0]} name={base} history={history[group[0].name]} />
                 )}
               </div>
-            </div>
-          )}
-          <IncidentHistory incidents={incidents} />
-        </div>
-      ) : (
-        <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text2)', fontFamily: "'GT Eesti Pro Text', system-ui, sans-serif", fontSize: '14px', background: 'rgba(8,0,26,0.55)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
-          Данные загружаются. Пожалуйста, подождите...
-        </div>
-      )}
-    </div>
-
-    <div style={{ marginTop: '60px' }}>
-      <Footer animate />
-    </div>
-    </>
+            </section>
+            <IncidentHistory incidents={incidents} />
+          </>
+        ) : (
+          <div className="rd-card rd-p-lg text-center text-[var(--rd-caption)]">
+            Данные загружаются. Пожалуйста, подождите…
+          </div>
+        )}
+      </div>
+    </main>
   )
 }

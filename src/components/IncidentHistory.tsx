@@ -1,6 +1,4 @@
-'use client'
-
-import { parseNamePrefix } from './ServerCard'
+import ServerLabel from './ServerLabel'
 import { cleanBaseName, formatDuration } from '../lib/format'
 import type { Incident } from '../lib/history-db'
 
@@ -10,7 +8,7 @@ interface IncidentHistoryProps {
 
 function formatDate(unixMs: number): string {
   return new Date(unixMs).toLocaleDateString('ru-RU', {
-    day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Europe/Moscow',
+    day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Moscow',
   })
 }
 
@@ -35,61 +33,36 @@ function groupByDate(incidents: Incident[]): [string, Incident[]][] {
 
 export default function IncidentHistory({ incidents }: IncidentHistoryProps) {
   return (
-    <div>
-      <h2 className="font-display" style={{ fontSize: 'clamp(1.4rem, 2.5vw, 1.75rem)', fontWeight: 700, color: 'var(--text)', margin: '0 0 20px' }}>
-        История инцидентов
-      </h2>
+    <section className="flex flex-col gap-(--rd-space-group)">
+      <h2 className="rd-h4 text-[var(--rd-heading)]">История инцидентов</h2>
 
       {incidents.length === 0 ? (
-        <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text2)', fontFamily: "'GT Eesti Pro Text', system-ui, sans-serif", fontSize: '13px', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: '14px' }}>
+        <div className="rd-card rd-p-lg text-center text-[var(--rd-caption)]">
           Инцидентов за последние 90 дней не было
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="flex flex-col gap-3">
           {groupByDate(incidents).map(([date, dayIncidents]) => (
-            <div key={date} className="server-card" style={{ padding: '28px' }}>
-              <h3 style={{ fontFamily: "'GT Eesti Pro Display', system-ui, sans-serif", fontSize: '15px', fontWeight: 700, color: 'var(--text)', margin: 0, paddingBottom: '14px', borderBottom: '1px solid var(--glass-border)' }}>
-                {date}
-              </h3>
-              <div className="divided-list">
-                {dayIncidents.map((incident, i) => {
-                  const prefix = parseNamePrefix(cleanBaseName(incident.name))
-                  return (
-                    <div key={i} style={{ padding: '16px 0 16px 14px' }}>
-                      <p style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', fontFamily: "'GT Eesti Pro Text', system-ui, -apple-system, sans-serif", fontSize: '13px', color: 'var(--text2)', margin: '0 0 14px' }}>
-                        <span>Зафиксировано в {formatTime(incident.startAt)} МСК</span>
-                        <span>простой {formatDuration(incident.durationMs)}</span>
-                      </p>
-                      <p style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', fontFamily: "'GT Eesti Pro Text', system-ui, -apple-system, sans-serif", fontSize: '14px', fontWeight: 500, color: 'var(--text)', margin: 0 }}>
-                        {prefix.type === 'flag' && (
-                          <img
-                            src={`https://flagcdn.com/20x15/${prefix.code}.png`}
-                            srcSet={`https://flagcdn.com/40x30/${prefix.code}.png 2x`}
-                            width={20}
-                            height={15}
-                            alt={prefix.code.toUpperCase()}
-                            style={{ flexShrink: 0, borderRadius: '2px', display: 'block' }}
-                          />
-                        )}
-                        {prefix.type === 'icon' && (
-                          <prefix.Icon size={16} color="#8b7ea3" style={{ flexShrink: 0 }} />
-                        )}
-                        <span>
-                          {prefix.cleanName}
-                          {incident.subdomain && (
-                            <span style={{ textTransform: 'uppercase' }}> ({incident.subdomain})</span>
-                          )}
-                          {' '}не отвечал на проверки статуса
-                        </span>
-                      </p>
-                    </div>
-                  )
-                })}
-              </div>
+            <div key={date} className="rounded-[var(--rd-radius-md)] bg-[var(--rd-surface)]">
+              <h3 className="rd-h6 border-b border-[var(--rd-divider)] px-5 py-5 text-[var(--rd-heading)] sm:px-6">{date}</h3>
+              <ul className="divide-y divide-[var(--rd-divider)]">
+                {dayIncidents.map((incident, i) => (
+                  <li key={i} className="flex flex-col gap-2 px-5 py-5 sm:px-6">
+                    <p className="rd-p-lg flex flex-wrap items-center gap-x-2 gap-y-1 text-[var(--rd-heading)]">
+                      <ServerLabel name={cleanBaseName(incident.name)} suffix={incident.subdomain ? `(${incident.subdomain})` : undefined} />
+                      <span>не отвечал на проверки</span>
+                    </p>
+                    <p className="rd-p-md flex flex-wrap justify-between gap-x-3 gap-y-1 text-[var(--rd-caption)]">
+                      <span>с {formatTime(incident.startAt)} МСК</span>
+                      <span>простой {formatDuration(incident.durationMs)}</span>
+                    </p>
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>
       )}
-    </div>
+    </section>
   )
 }

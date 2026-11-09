@@ -1,0 +1,387 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   postq design system — light + dark
+   Source: Figma "postq-vpn-site-redesign" (Main page / Main page dark).
+   Scoped to `.rd-page` (the wrapper in app/layout.tsx). Theme is chosen by `data-rd-theme` on
+   <html> (set before paint by RdThemeScript); see README.md next to this file.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Semantic tokens — light (default) ─────────────────────────────────────── */
+.rd-page {
+  /* Surfaces */
+  --rd-page:               #f8f8f8; /* Surface/page */
+  --rd-surface:            #ffffff; /* Surface/default — cards */
+  --rd-field:              #f8f8f8; /* stepper inside a card */
+  --rd-chip:               #f4f4f4; /* Surface/disabled — platform chips */
+  --rd-chip-hover:         #e9e9e9;
+  --rd-help:               #fff4f9; /* Surface/help — "1 шаг", "Самое выгодное" badges */
+  --rd-mock-chip:          rgba(0, 0, 0, 0.03); /* chips inside phone mockups */
+  --rd-tile:               #ffffff; /* ChatGPT tile in the hero collage */
+
+  /* Action (brand) */
+  --rd-action:             #ff2181; /* Surface/action, Text/action */
+  --rd-action-hover:       #e61a72;
+  --rd-action-soft:        #ffe9f2; /* secondary button background */
+  --rd-action-soft-hover:  #ffdaea;
+  --rd-on-action:          #ffffff;
+  --rd-on-soft:            #ff2181; /* text on secondary buttons and badges */
+  --rd-accent-border:      #ffe9f2; /* highlighted cards (best plan, promo, FAQ) */
+
+  /* Text */
+  --rd-heading:            #212023; /* Text/heading */
+  --rd-body:               #4d4d4f; /* Text/body */
+  --rd-caption:            #7a797b; /* Text/caption */
+  --rd-strike:             #d3d2d3; /* old price */
+  --rd-placeholder:        #a6a6a7; /* Text/placeholder, Icon/placeholder */
+
+  /* Lines */
+  --rd-border:             #e9e9e9; /* Border/disabled — inputs, tables, code */
+  --rd-border-accent:      #ffd3e6; /* Border/default — highlighted node */
+
+  /* Callouts (help articles) */
+  --rd-info-bg:            #eaf0ff; /* Surface/information */
+  --rd-info-icon:          #2257cc; /* Icon/information */
+  --rd-warn-bg:            #fff9e5; /* Surface/warning */
+  --rd-warn-icon:          #cca000; /* Icon/warning */
+
+  /* Code */
+  --rd-code-text:          #35323c;
+  --rd-code-comment:       #777681;
+  --rd-code-key:           #9b3770;
+  --rd-code-string:        #277565;
+
+  /* Chrome */
+  --rd-nav-bg:             rgba(255, 255, 255, 0.7);
+  --rd-menu-bg:            rgba(255, 255, 255, 0.94); /* dropdowns: denser than the bar, page text mustn't show through */
+  --rd-nav-link:           rgba(33, 32, 35, 0.5);
+  --rd-icon-btn:           rgba(0, 0, 0, 0.05);
+  --rd-divider:            rgba(33, 32, 35, 0.05);
+  --rd-shadow:             0 4px 40px rgba(0, 0, 0, 0.05);
+  --rd-shadow-soft:        0 2px 24px rgba(0, 0, 0, 0.03); /* card hover */
+  --rd-rings:              #ff2181; /* hero background rings, drawn at 3% */
+
+  /* Shape */
+  --rd-radius-lg:          48px;
+  --rd-radius-md:          24px;
+  --rd-radius-control:     20px;
+
+  /* Vertical rhythm. Each gap answers "what is being separated", not a number:
+     section   — between page sections (and the footer)
+     head      — a section's heading block → its content
+     card      — content blocks inside a large card (devices, trial promo)
+     group     — blocks within a section: card grid → info card, grid gaps
+     title     — a heading → its subtitle
+     The first three grow with the viewport (see the media queries below). */
+  --rd-space-section:      64px;
+  --rd-space-head:         32px;
+  --rd-space-card:         32px;
+  --rd-space-group:        24px;
+  --rd-space-title:        12px;
+
+  background: var(--rd-page);
+  color: var(--rd-heading);
+  font-family: var(--font-display);
+  min-height: 100vh;
+  color-scheme: light;
+  /* Grayscale AA like Figma: macOS browsers otherwise render GT Eesti noticeably
+     heavier than the mockups, especially light text on the dark theme. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Semantic tokens — dark ────────────────────────────────────────────────── */
+html[data-rd-theme='dark'] .rd-page {
+  --rd-page:               #1a1a1c;
+  --rd-surface:            #212023;
+  --rd-field:              #373639;
+  --rd-chip:               #373639;
+  --rd-chip-hover:         #424144;
+  --rd-help:               #660d34;
+  --rd-mock-chip:          #212023;
+  --rd-tile:               #000000;
+
+  --rd-action-soft:        #660d34;
+  --rd-action-soft-hover:  #7a1040;
+  --rd-on-soft:            #ffd3e6;
+  --rd-accent-border:      #99144d;
+
+  --rd-heading:            #f8f8f8;
+  --rd-body:               #d3d2d3;
+  --rd-caption:            #a6a6a7;
+  --rd-strike:             #7a797b;
+  --rd-placeholder:        #908f91;
+
+  --rd-border:             #4d4d4f;
+  --rd-border-accent:      #99144d;
+  --rd-rings:              #ffffff;
+
+  --rd-info-bg:            #081633;
+  --rd-info-icon:          #7fa7ff;
+  --rd-warn-bg:            #665000;
+  --rd-warn-icon:          #ffde66;
+
+  /* Not in the Figma dark frame (it reuses the light code colours, which are
+     unreadable on #1a1a1c) — lightened equivalents of the same hues. */
+  --rd-code-text:          #e4e3e6;
+  --rd-code-comment:       #908f91;
+  --rd-code-key:           #ff8cc0;
+  --rd-code-string:        #6fd1b0;
+
+  --rd-nav-bg:            rgba(26, 26, 28, 0.7);
+  --rd-menu-bg:           rgba(33, 32, 35, 0.94);
+  --rd-nav-link:           rgba(255, 255, 255, 0.3);
+  --rd-icon-btn:           rgba(255, 255, 255, 0.05);
+  --rd-divider:            rgba(255, 255, 255, 0.06);
+  --rd-shadow:             0 4px 40px rgba(0, 0, 0, 0.3);
+  --rd-shadow-soft:        0 2px 24px rgba(0, 0, 0, 0.18);
+
+  color-scheme: dark;
+}
+
+@media (min-width: 768px) {
+  .rd-page { --rd-space-section: 96px; --rd-space-head: 48px; --rd-space-card: 40px; }
+}
+@media (min-width: 1024px) {
+  .rd-page { --rd-space-section: 128px; --rd-space-head: 64px; --rd-space-card: 48px; }
+}
+
+html:has(.rd-page),
+body:has(.rd-page) { background: #f8f8f8; }
+html[data-rd-theme='dark']:has(.rd-page),
+html[data-rd-theme='dark'] body:has(.rd-page) { background: #1a1a1c; }
+
+/* Scrollbars follow the theme everywhere. The page's own scrollbar belongs to
+   the root, so color-scheme has to be on <html> (on .rd-page it only reaches
+   inner scroll areas); scrollbar-color tints it where supported (Chrome,
+   Firefox), color-scheme alone covers Safari. Inner areas inherit both. */
+html:has(.rd-page) { color-scheme: light; scrollbar-color: #c4c4c5 #f8f8f8; }
+html[data-rd-theme='dark']:has(.rd-page) { color-scheme: dark; scrollbar-color: #4a494c #1a1a1c; }
+
+/* Trims horizontal overflow (decorations hanging off cards) without making body
+   a scroll container: overflow-x: hidden would, and break position: sticky
+   (article TOC). */
+html:has(.rd-page),
+body:has(.rd-page) { overflow-x: clip; }
+
+.rd-page ::selection { background: rgba(255, 33, 129, 0.25); color: var(--rd-heading); }
+
+/* Theme-specific assets: <RdImg> renders both variants, CSS shows one. */
+html[data-rd-theme='dark'] .rd-page .rd-v-light,
+html:not([data-rd-theme='dark']) .rd-page .rd-v-dark { display: none !important; }
+
+/* Component classes live in the components layer so Tailwind utilities
+   (hidden, lg:px-16, …) can still override them on a given element. */
+@layer components {
+  /* ─── Type scale ────────────────────────────────────────────────────────────── */
+  .rd-h1 { font-weight: 700; font-size: clamp(40px, 6vw, 76px); line-height: 1.21; }
+  .rd-h2 { font-weight: 700; font-size: clamp(36px, 4.6vw, 60px); line-height: 1.2; }
+  .rd-h3 { font-weight: 700; font-size: clamp(28px, 3.6vw, 48px); line-height: 1.25; }
+  .rd-h4 { font-weight: 700; font-size: clamp(26px, 3vw, 40px); line-height: 1.2; }
+  .rd-h5 { font-weight: 700; font-size: clamp(24px, 2.4vw, 32px); line-height: 36px; }
+  .rd-h6 { font-weight: 700; font-size: 24px; line-height: 32px; }
+  .rd-p-lg { font-weight: 400; font-size: clamp(17px, 1.6vw, 20px); line-height: 24px; }
+  .rd-p-md { font-weight: 400; font-size: 16px; line-height: 20px; }
+
+  /* ─── Surfaces ──────────────────────────────────────────────────────────────── */
+  .rd-card {
+    background: var(--rd-surface);
+    border-radius: var(--rd-radius-lg);
+    padding: 48px;
+  }
+  @media (max-width: 767px) {
+    .rd-card { border-radius: 32px; padding: 28px 24px; }
+  }
+
+  /* Small pill label sitting on a card's top-left corner. */
+  .rd-badge {
+    background: var(--rd-help);
+    color: var(--rd-on-soft);
+    border-radius: 15px;
+    padding: 8px 16px;
+  }
+
+  /* ─── Buttons ───────────────────────────────────────────────────────────────── */
+  .rd-btn,
+  .rd-btn-soft {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--rd-radius-control);
+    white-space: nowrap;
+    text-decoration: none;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+  }
+  .rd-btn:active,
+  .rd-btn-soft:active { transform: scale(0.98); }
+  .rd-btn:focus-visible,
+  .rd-btn-soft:focus-visible,
+  .rd-icon-btn:focus-visible {
+    outline: 2px solid var(--rd-action);
+    outline-offset: 2px;
+  }
+  .rd-btn {
+    background: var(--rd-action);
+    color: var(--rd-on-action);
+    padding: 24px 32px;
+    font-size: 20px;
+    line-height: 24px;
+  }
+  .rd-btn:hover { background: var(--rd-action-hover); }
+  .rd-btn-soft {
+    background: var(--rd-action-soft);
+    color: var(--rd-on-soft);
+    padding: 24px 32px;
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 500;
+  }
+  .rd-btn-soft:hover { background: var(--rd-action-soft-hover); }
+  .rd-btn-soft.rd-btn-soft--lg { font-size: 20px; line-height: 24px; font-weight: 400; }
+  @media (max-width: 767px) {
+    .rd-btn { padding: 18px 28px; font-size: 18px; }
+    .rd-btn-soft { padding: 18px 24px; }
+  }
+
+  /* Round 43px header button (theme, language). */
+  .rd-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 43px;
+    height: 43px;
+    padding: 10px;
+    border-radius: 50px;
+    background: var(--rd-icon-btn);
+    cursor: pointer;
+  }
+
+  .rd-link { color: var(--rd-caption); text-decoration: none; transition: color 0.15s ease; }
+  .rd-link:hover { color: var(--rd-heading); }
+
+  /* ─── Layout ────────────────────────────────────────────────────────────────── */
+  /* Page-width column shared by <main> and the footer. */
+  .rd-container { width: 100%; max-width: 1440px; margin-inline: auto; padding-inline: 16px; }
+  @media (min-width: 640px) { .rd-container { padding-inline: 24px; } }
+  @media (min-width: 1536px) { .rd-container { padding-inline: 0; } }
+  /* <main> also clears the fixed header. */
+  .rd-main { padding-top: 108px; }
+  @media (min-width: 640px) { .rd-main { padding-top: 128px; } }
+  @media (min-width: 1024px) { .rd-main { padding-top: 160px; } }
+
+  /* Phone swipe row (pricing, benefits, how-to): cards sit side by side and the
+     next one peeks in. The row bleeds to the screen edges (negative margin =
+     .rd-container padding) so badges hanging off a card aren't clipped.
+     -md switches off from 768px, -lg from 1024px; markup adds the grid for
+     wider screens. Hidden decorative children ([aria-hidden]) are skipped. */
+  @media (max-width: 767.98px) {
+    .rd-swipe-md { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; scroll-padding-inline: 16px; }
+    .rd-swipe-md > :not([aria-hidden]) { flex-shrink: 0; width: 85%; scroll-snap-align: center; }
+  }
+  @media (max-width: 1023.98px) {
+    .rd-swipe-lg { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; scroll-padding-inline: 16px; }
+    .rd-swipe-lg > :not([aria-hidden]) { flex-shrink: 0; width: 85%; scroll-snap-align: center; }
+  }
+  @media (min-width: 640px) and (max-width: 1023.98px) {
+    .rd-swipe-md, .rd-swipe-lg { margin-inline: -24px; padding-inline: 24px; scroll-padding-inline: 24px; }
+  }
+  @media (min-width: 768px) and (max-width: 1023.98px) {
+    .rd-swipe-lg > :not([aria-hidden]) { width: 60%; }
+  }
+  .rd-swipe-md::-webkit-scrollbar,
+  .rd-swipe-lg::-webkit-scrollbar { display: none; }
+}
+
+/* Preloader (RdPreloader): the server-rendered overlay waits 300 ms before
+   fading in, so pages that load fast never show it. The second animation is a
+   no-JS safety net that clears it if the script never gets to. */
+.rd-preloader {
+  opacity: 0;
+  animation: rd-preloader-in 0.25s ease-out 0.3s forwards, rd-preloader-out 0.4s ease 12s forwards;
+}
+.rd-preloader.rd-preloader-leaving { animation: rd-preloader-out 0.4s ease forwards; }
+@keyframes rd-preloader-in { to { opacity: 1; } }
+@keyframes rd-preloader-out { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }
+
+/* Pages with the floating back-to-top button (help articles, below lg) leave
+   room for it under the footer so it never covers the last row. */
+@media (max-width: 1023.98px) {
+  .rd-page:has(.rd-scroll-top) .rd-footer { padding-bottom: 96px; }
+}
+
+/* Hero background rings: a CSS remake of Figma's "Concentric patterns" fill
+   (circle, 2 rings, radius 12, centre 80%/50%, inverse falloff 0.5). Rings
+   repeat every 12% of the hero's height, the inner half of each step is
+   filled, and the mask fades them out towards the centre the way the shader's
+   1 − e^(−d/0.48h) did. cqh = the hero's height via container-type. */
+.rd-page .rd-rings { container-type: size; }
+.rd-page .rd-rings > div {
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background: repeating-radial-gradient(circle at 80% 50%,
+    var(--rd-rings) 0 calc(6cqh - 0.75px),
+    transparent calc(6cqh + 0.75px) calc(12cqh - 0.75px),
+    var(--rd-rings) 12cqh);
+  --rd-rings-fade: radial-gradient(circle at 80% 50%,
+    transparent 0, rgb(0 0 0 / 0.63) 48cqh, rgb(0 0 0 / 0.86) 96cqh, rgb(0 0 0 / 0.95) 144cqh, #000 200cqh);
+  -webkit-mask: var(--rd-rings-fade);
+  mask: var(--rd-rings-fade);
+}
+
+/* Theme toggle icon (RdThemeToggle): moon in light theme, sun in dark.
+   Shapes swap with a rotate + scale cross-fade. */
+.rd-page .rd-theme-icon {
+  display: block;
+  color: var(--rd-heading);
+  overflow: visible;
+  transition: transform 0.15s ease;
+}
+.rd-page .rd-theme-icon g {
+  transform-origin: 12px 12px;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+}
+.rd-page .rd-theme-icon__sun { opacity: 0; transform: rotate(-90deg) scale(0.4); }
+html[data-rd-theme='dark'] .rd-page .rd-theme-icon__moon { opacity: 0; transform: rotate(90deg) scale(0.4); }
+html[data-rd-theme='dark'] .rd-page .rd-theme-icon__sun { opacity: 1; transform: none; }
+.rd-page .rd-icon-btn:active .rd-theme-icon { transform: scale(0.9); }
+@media (prefers-reduced-motion: reduce) {
+  .rd-page .rd-theme-icon, .rd-page .rd-theme-icon g { transition: none; }
+}
+
+/* FAQ answer (RdFaq): height animates via grid rows 0fr → 1fr, text fades
+   and slides in slightly behind it. */
+.rd-page .rd-faq-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.rd-page .rd-faq-panel[data-open='true'] { grid-template-rows: 1fr; }
+.rd-page .rd-faq-panel__inner {
+  min-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.2s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.rd-page .rd-faq-panel[data-open='true'] .rd-faq-panel__inner {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.05s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rd-page .rd-faq-panel, .rd-page .rd-faq-panel__inner { transition: none; }
+}
+
+/* Circular reveal on theme switch: the new snapshot is clipped by JS,
+   so the default cross-fade is turned off. */
+html.rd-theme-vt::view-transition-old(root),
+html.rd-theme-vt::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+
+/* Monochrome icon painted with the current text colour (see RdIcon.tsx):
+   one SVG file serves both themes. */
+.rd-page .rd-icon {
+  display: inline-block;
+  flex-shrink: 0;
+  background-color: currentColor;
+  -webkit-mask: var(--rd-icon-src) center / contain no-repeat;
+  mask: var(--rd-icon-src) center / contain no-repeat;
+}
