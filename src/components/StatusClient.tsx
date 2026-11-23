@@ -157,14 +157,14 @@ export default function StatusClient({
         {servers.length > 0 ? (
           <>
             {services.length > 0 && (
-              <section className="flex flex-col gap-(--rd-space-group)">
+              <section className="rd-layer flex flex-col gap-(--rd-space-group)">
                 <h2 className="rd-h4 text-[var(--rd-heading)]">Инфраструктура</h2>
                 <div className="divide-y divide-[var(--rd-divider)] rounded-[var(--rd-radius-md)] bg-[var(--rd-surface)]">
                   {services.map((svc) => <ServerCard key={svc.name} {...svc} history={history[svc.name]} />)}
                 </div>
               </section>
             )}
-            <section className="flex flex-col gap-(--rd-space-group)">
+            <section className="rd-layer flex flex-col gap-(--rd-space-group)">
               <h2 className="rd-h4 text-[var(--rd-heading)]">VPN-серверы</h2>
               <div className="divide-y divide-[var(--rd-divider)] rounded-[var(--rd-radius-md)] bg-[var(--rd-surface)]">
                 {groups.map(([base, group]) =>

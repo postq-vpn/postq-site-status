@@ -10,12 +10,43 @@ interface UptimeBarProps {
   alive?: boolean
 }
 
-const STATUS_COLOR: Record<DayStatus['status'], string> = {
-  online: 'bg-[var(--st-ok)]',
-  partial: 'bg-[var(--st-warn)]',
-  offline: 'bg-[var(--st-bad)]',
+const STATUS_FILL: Record<DayStatus['status'], string> = {
+  online: 'var(--st-ok)',
+  partial: 'var(--st-warn)',
+  offline: 'var(--st-bad)',
   // Not a real status — an empty slot for days before history started.
-  nodata: 'bg-[var(--st-nodata)]',
+  nodata: 'var(--st-nodata)',
+}
+
+/* Bar geometry in SVG units. The SVG stretches to the row width with
+   preserveAspectRatio="none", so these are proportions: 2-unit gaps between
+   8.5-unit bars come out at ~2px gaps on both a 950px desktop row (90 days)
+   and a 300px phone row (30 days), with the 2px corner radius barely skewed. */
+const BAR = 8.5
+const GAP = 2
+const HEIGHT = 32
+
+/** One <svg> instead of a flex row of 90 <span>s: to layout it's a single
+ *  replaced box, so expanding a row (whose height animates frame by frame)
+ *  doesn't re-flow 90 children per bar per frame. Tooltips stay native via
+ *  <title>; they're only worth the bytes where there's a hover (desktop). */
+function Bars({ days, titles, className }: { days: DayStatus[]; titles: boolean; className: string }) {
+  const width = days.length * (BAR + GAP) - GAP
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${HEIGHT}`}
+      preserveAspectRatio="none"
+      className={`block h-8 w-full ${className}`}
+      role="img"
+      aria-label={`Аптайм за ${days.length} дней`}
+    >
+      {days.map((day, i) => (
+        <rect key={day.date} x={i * (BAR + GAP)} width={BAR} height={HEIGHT} rx={2} fill={STATUS_FILL[day.status]}>
+          {titles && <title>{tooltipFor(day)}</title>}
+        </rect>
+      ))}
+    </svg>
+  )
 }
 
 function formatDay(date: string): string {
@@ -61,15 +92,10 @@ function UptimeBar({ history, subdomain, alive }: UptimeBarProps) {
         {avgMobile !== null && <span className="text-[var(--rd-caption)] sm:hidden">{avgMobile.toFixed(1)}% аптайм</span>}
       </div>
       {history.length > 0 && (
-        <div className="flex h-8 gap-[2px]">
-          {history.map((day, i) => (
-            <span
-              key={day.date}
-              title={tooltipFor(day)}
-              className={`min-w-px flex-1 rounded-[2px] ${STATUS_COLOR[day.status]} ${i < cutoff ? 'max-sm:hidden' : ''}`}
-            />
-          ))}
-        </div>
+        <>
+          <Bars days={history} titles className="max-sm:hidden" />
+          <Bars days={history.slice(cutoff)} titles={false} className="sm:hidden" />
+        </>
       )}
       <div className="flex justify-between text-[13px] leading-4 text-[var(--rd-placeholder)]">
         <span className="max-sm:hidden">{history.length} дней назад</span>
@@ -80,5 +106,5 @@ function UptimeBar({ history, subdomain, alive }: UptimeBarProps) {
   )
 }
 
-/** Memoised: polls that change nothing for this server skip its 90 segments. */
+/** Memoised: polls that change nothing for this server skip re-rendering it. */
 export default memo(UptimeBar)

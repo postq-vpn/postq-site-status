@@ -99,3 +99,13 @@ html[data-rd-theme='dark'] .rd-page {
     background: var(--rd-surface);
   }
 }
+
+/* ─── Expand animation: compositor layers ───────────────────────────────────── */
+/* Opening a row animates its height, so every block below it moves on every
+   frame. Without layers the browser repaints all of them each frame, footer
+   payment logos included (a Chrome trace showed paint at ~3x layout). On its
+   own layer a block that only moves is shifted by the GPU with no repaint.
+   Permanent layers (not toggled during animation), so the header's backdrop
+   blur never sees layers come and go — that is what made it blink before. */
+.rd-page .rd-layer,
+.rd-page .rd-footer { will-change: transform; }

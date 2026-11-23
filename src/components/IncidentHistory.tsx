@@ -33,7 +33,7 @@ function groupByDate(incidents: Incident[]): [string, Incident[]][] {
 
 export default function IncidentHistory({ incidents }: IncidentHistoryProps) {
   return (
-    <section className="flex flex-col gap-(--rd-space-group)">
+    <section className="rd-layer flex flex-col gap-(--rd-space-group)">
       <h2 className="rd-h4 text-[var(--rd-heading)]">История инцидентов</h2>
 
       {incidents.length === 0 ? (

@@ -1,6 +1,6 @@
 'use client'
 
-import { useId, useState, type ReactNode } from 'react'
+import { useEffect, useId, useState, type ReactNode } from 'react'
 import RdImg from '@/design-system/RdImg'
 
 interface Props {
@@ -14,9 +14,21 @@ interface Props {
  *  optional history panel that expands like the site's FAQ. */
 export default function StatusRow({ label, status, children }: Props) {
   const [open, setOpen] = useState(false)
-  // The panel's content (90-day bars) is only built on first open, then kept
-  // so closing still animates. Keeps ~1,500 hidden segments out of the DOM.
+  // The panel's content (uptime bars) isn't in the server HTML; it's built in
+  // idle time right after load, so a tap only has to animate, never to create
+  // DOM in the same frame the animation starts (that was the first-open hitch).
   const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    if (mounted || !children) return
+    const ric = window.requestIdleCallback
+    if (ric) {
+      const id = ric(() => setMounted(true), { timeout: 2000 })
+      return () => window.cancelIdleCallback(id)
+    }
+    // Safari has no requestIdleCallback.
+    const id = setTimeout(() => setMounted(true), 300)
+    return () => clearTimeout(id)
+  }, [mounted, children])
   const panelId = useId()
   const expandable = Boolean(children)
 
@@ -40,7 +52,10 @@ export default function StatusRow({ label, status, children }: Props) {
   }
 
   return (
-    <div>
+    // contain: layout paint: the panel's height changes every frame while it
+    // animates; this keeps that relayout/repaint inside this row instead of
+    // invalidating the rest of the list.
+    <div className="[contain:layout_paint]">
       <button
         type="button"
         aria-expanded={open}

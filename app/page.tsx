@@ -8,7 +8,10 @@ export default async function StatusPage() {
   const { servers, services, checkedAt } = await getStatusSnapshot()
 
   // DEV MOCK: no xray-checker locally — render fixtures (services stay real).
-  if (process.env.NODE_ENV === 'development' && !process.env.XRAY_CHECKER_URL) {
+  // STATUS_DEV_MOCK=1 does the same for a local production build (`next start`),
+  // e.g. to profile animations; never set it on the server.
+  const mock = process.env.NODE_ENV === 'development' || process.env.STATUS_DEV_MOCK === '1'
+  if (mock && !process.env.XRAY_CHECKER_URL) {
     return (
       <StatusClient
         live={false}
