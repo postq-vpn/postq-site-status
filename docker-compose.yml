@@ -1,6 +1,9 @@
 services:
   xray-checker:
-    image: kutovoys/xray-checker:v1.3.1
+    # Upstream v1.3.1 rebuilt with Xray-core v26.11.9 (upstream ships a June
+    # 2026 xray-core). See xray-checker/Dockerfile for how and how to bump.
+    build: ./xray-checker
+    image: postq-xray-checker:v1.3.1-xray-v26.11.9
     container_name: postq_xray_checker
     restart: unless-stopped
     environment:
