@@ -154,6 +154,10 @@ html[data-rd-theme='dark'] body:has(.rd-page) { background: #1a1a1c; }
    inner scroll areas); scrollbar-color tints it where supported (Chrome,
    Firefox), color-scheme alone covers Safari. Inner areas inherit both. */
 html:has(.rd-page) { color-scheme: light; scrollbar-color: #c4c4c5 #f8f8f8; }
+/* Opening an FAQ answer can push the page past one screen: a classic
+   (non-overlay) scrollbar then appears, narrows the viewport, and the fixed
+   header jumps sideways. Reserving the gutter keeps the width constant. */
+html:has(.rd-page) { scrollbar-gutter: stable; }
 html[data-rd-theme='dark']:has(.rd-page) { color-scheme: dark; scrollbar-color: #4a494c #1a1a1c; }
 
 /* Trims horizontal overflow (decorations hanging off cards) without making body
@@ -347,8 +351,10 @@ html[data-rd-theme='dark'] .rd-page .rd-theme-icon__sun { opacity: 1; transform:
   .rd-page .rd-theme-icon, .rd-page .rd-theme-icon g { transition: none; }
 }
 
-/* FAQ answer (RdFaq): height animates via grid rows 0fr → 1fr, text fades
-   and slides in slightly behind it. */
+/* FAQ answer (RdFaq): height animates via grid rows 0fr → 1fr, text fades in
+   behind it. No slide: a transform promoted a GPU layer for every open/close,
+   and Chrome re-composites the header's backdrop blur a frame late whenever
+   layers come and go, so the bar blinked each time. Opacity alone doesn't. */
 .rd-page .rd-faq-panel {
   display: grid;
   grid-template-rows: 0fr;
@@ -359,22 +365,15 @@ html[data-rd-theme='dark'] .rd-page .rd-theme-icon__sun { opacity: 1; transform:
   min-height: 0;
   overflow: hidden;
   opacity: 0;
-  transform: translateY(-6px);
-  transition: opacity 0.2s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.2s ease;
 }
 .rd-page .rd-faq-panel[data-open='true'] .rd-faq-panel__inner {
   opacity: 1;
-  transform: none;
   transition-delay: 0.05s;
 }
 @media (prefers-reduced-motion: reduce) {
   .rd-page .rd-faq-panel, .rd-page .rd-faq-panel__inner { transition: none; }
 }
-
-/* Circular reveal on theme switch: the new snapshot is clipped by JS,
-   so the default cross-fade is turned off. */
-html.rd-theme-vt::view-transition-old(root),
-html.rd-theme-vt::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
 
 /* Monochrome icon painted with the current text colour (see RdIcon.tsx):
    one SVG file serves both themes. */

@@ -2,52 +2,17 @@
 
 import { setRdTheme, useRdTheme, type RdTheme } from './theme'
 
-type ViewTransitionDoc = Document & {
-  startViewTransition?: (update: () => void) => { ready: Promise<void>; finished: Promise<void> }
-}
-
 /** Theme-specific <RdImg> variants are lazy and hidden, so they'd only start
- *  loading after the switch and pop in mid-reveal. Load them first (capped). */
+ *  loading once shown and pop in after the switch. Warm them up when the
+ *  button is hovered, focused or touched, before the click. */
 function preloadVariants(theme: RdTheme) {
-  const imgs = document.querySelectorAll<HTMLImageElement>(`.rd-page .rd-v-${theme}`)
-  const loads = Array.from(imgs, (img) => {
+  document.querySelectorAll<HTMLImageElement>(`.rd-page .rd-v-${theme}`).forEach((img) => {
     img.loading = 'eager'
-    return img.decode().catch(() => {})
   })
-  return Promise.race([Promise.all(loads), new Promise((r) => setTimeout(r, 300))])
 }
 
-/** Switches the theme with a circular reveal growing from the button
- *  (View Transitions API); instant where unsupported or motion is reduced. */
-async function switchTheme(next: RdTheme, button: HTMLButtonElement) {
-  const doc = document as ViewTransitionDoc
-  if (!doc.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    setRdTheme(next)
-    return
-  }
-  await preloadVariants(next)
-
-  const rect = button.getBoundingClientRect()
-  const x = rect.left + rect.width / 2
-  const y = rect.top + rect.height / 2
-  const r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))
-
-  const root = doc.documentElement
-  root.classList.add('rd-theme-vt')
-  const vt = doc.startViewTransition(() => setRdTheme(next))
-  // Drop the class only once the pseudo-elements are gone; earlier, the
-  // browser's default cross-fade would kick in and flash the old theme.
-  vt.finished.finally(() => root.classList.remove('rd-theme-vt'))
-  vt.ready
-    .then(() => {
-      root.animate(
-        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${r}px at ${x}px ${y}px)`] },
-        { duration: 500, easing: 'cubic-bezier(0.4, 0, 0.2, 1)', pseudoElement: '::view-transition-new(root)' },
-      )
-    })
-    .catch(() => {})
-}
-
+/* The switch is instant. It used to be a circular reveal (View Transitions
+   API), but snapshotting the page with its frosted-glass layers stuttered. */
 export default function RdThemeToggle({ className = '' }: { className?: string }) {
   const theme = useRdTheme()
   const next = theme === 'dark' ? 'light' : 'dark'
@@ -56,7 +21,9 @@ export default function RdThemeToggle({ className = '' }: { className?: string }
       type="button"
       aria-label={next === 'dark' ? 'Включить тёмную тему' : 'Включить светлую тему'}
       aria-pressed={theme === 'dark'}
-      onClick={(e) => switchTheme(next, e.currentTarget)}
+      onPointerEnter={() => preloadVariants(next)}
+      onFocus={() => preloadVariants(next)}
+      onClick={() => setRdTheme(next)}
       className={`rd-icon-btn ${className}`}
     >
       {/* Sun and moon share one SVG; CSS on html[data-rd-theme] picks the

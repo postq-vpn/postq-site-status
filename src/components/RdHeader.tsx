@@ -41,8 +41,12 @@ const LOGIN_CLASS = 'rounded-[15px] bg-[var(--rd-action)] px-6 py-3 text-[16px] 
    rebuilt (theme switch, preloader leaving, dropdown opening), and the bar
    blinks out for that moment. Same fix as the old help-search dropdown. */
 const RD_GLASS = 'shadow-[var(--rd-shadow)] backdrop-blur-xl will-change-[backdrop-filter]'
-/** Frosted pill used for each separate piece of the bar on phones. */
-const RD_PILL = 'max-sm:bg-[var(--rd-nav-bg)] max-sm:shadow-[var(--rd-shadow)] max-sm:backdrop-blur-xl max-sm:will-change-[backdrop-filter]'
+/** Liquid-glass pill used for each separate piece of the bar on phones, the
+ *  same glass as the cabinet's mobile header (rd-liquid-glass, globals.css). */
+const RD_PILL = 'max-sm:rd-liquid-glass'
+/** The phone menu panel: the same glass edge, but a denser fill (menu-bg) so
+ *  the page doesn't show through its links. */
+const RD_MENU_PILL = 'max-sm:rd-liquid-glass max-sm:!bg-[var(--rd-menu-bg)]'
 
 export default function RdHeader() {
   const [usefulOpen, setUsefulOpen] = useState(false)
@@ -86,8 +90,13 @@ export default function RdHeader() {
         <div aria-hidden className={`pointer-events-none absolute inset-0 -z-10 hidden rounded-[25px] sm:block bg-[var(--rd-nav-bg)] ${RD_GLASS}`} />
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-12">
-            <a href={RD_HOME} aria-label="PostqVPN — на главную" className={`shrink-0 ${RD_PILL} flex h-14 items-center rounded-[25px] px-4 sm:h-auto sm:px-0`}>
-              <RdImg name="nav-logo" width={154} height={31} className="block h-[26px] w-auto sm:h-[31px]" />
+            {/* Same markup as postq-site's logo pill, minus its «Назад» slot (the
+                status site is a single page): on phones a 56px-tall pill with
+                15.665px padding, the wordmark clipped to its full 129px. */}
+            <a href={RD_HOME} aria-label="PostqVPN — на главную" className={`shrink-0 ${RD_PILL} flex h-14 items-center rounded-[25px] px-[15.665px] sm:h-auto sm:px-0`}>
+              <span className="block h-[26px] w-[129px] overflow-hidden sm:h-[31px] sm:w-auto">
+                <RdImg name="nav-logo" width={154} height={31} className="block h-[26px] w-auto max-w-none sm:h-[31px]" />
+              </span>
             </a>
             <nav aria-label="Основная навигация" className="hidden items-center gap-8 lg:flex">
               {NAV.map(item => (
@@ -157,7 +166,7 @@ export default function RdHeader() {
         {menuOpen && (
           <nav
             aria-label="Мобильная навигация"
-            className={`mt-3 flex flex-col gap-1 lg:hidden ${RD_PILL} max-sm:rounded-[25px] max-sm:p-3 sm:border-t sm:border-[var(--rd-divider)] sm:pt-3`}
+            className={`mt-3 flex flex-col gap-1 lg:hidden ${RD_MENU_PILL} max-sm:rounded-[25px] max-sm:p-3 sm:border-t sm:border-[var(--rd-divider)] sm:pt-3`}
           >
             {[...NAV, ...USEFUL].map(item => (
               <Link key={item.href} href={item.href} onClick={e => { setMenuOpen(false); smoothScrollTo(e, item.href) }} className="rounded-[12px] px-3 py-3 text-[16px] text-[var(--rd-heading)] hover:bg-[var(--rd-icon-btn)]">

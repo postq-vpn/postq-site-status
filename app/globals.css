@@ -72,26 +72,30 @@ html[data-rd-theme='dark'] .rd-page {
   --st-nodata:  #3a393c;
 }
 
-/* ─── Header stability (overrides for postq.css, kept here so that file stays
-   a clean copy of postq-site's) ───────────────────────────────────────────── */
-
-/* Expanding a row can push the page past one screen: a classic (non-overlay)
-   scrollbar then appears and narrows the viewport, and the fixed header jumps
-   sideways. Reserving the gutter keeps the width constant. */
-html:has(.rd-page) { scrollbar-gutter: stable; }
-
-/* The panel used to slide in with a transform, which promoted a GPU layer for
-   the length of every open/close. Chrome re-composites the header's
-   backdrop blur a frame late whenever layers are created or dropped, and the
-   bar blinked each time. Opacity alone doesn't trigger that. */
-.rd-page .rd-faq-panel__inner,
-.rd-page .rd-faq-panel[data-open='true'] .rd-faq-panel__inner { transform: none; }
-
-/* The bar is 70% see-through on postq.space, which is fine over that site's
-   calm sections. Here it scrolls over rows of saturated green 90-day bars
-   separated by white gaps, so at 70% the whole header strobed green ↔ white
-   while scrolling (measured frame by frame: ~10 luma levels per swing). A
-   denser fill keeps the frosted look but stops the flashing. Extra `html` in
-   the selectors: this file loads before postq.css. */
-html .rd-page { --rd-nav-bg: rgba(255, 255, 255, 0.9); }
-html[data-rd-theme='dark'] body .rd-page { --rd-nav-bg: rgba(26, 26, 28, 0.9); }
+/* ─── Liquid glass (phones), the same as the cabinet's .rd-liquid-glass ─────── */
+/* Copied from postq-site's app/globals.css — keep the two in sync.
+   Clear, heavily blurred and saturated, with a thin specular edge. A utility so
+   it takes variants: the header uses it as max-sm:rd-liquid-glass (on wider
+   screens its pieces sit inside the one frosted bar). */
+@utility rd-liquid-glass {
+  background: rgba(255, 255, 255, 0.36);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.24),
+    0 8px 32px rgba(0, 0, 0, 0.12);
+  will-change: backdrop-filter;
+  html[data-rd-theme='dark'] & {
+    background: rgba(40, 40, 44, 0.4);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.16),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.04),
+      0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    background: var(--rd-surface);
+  }
+}
