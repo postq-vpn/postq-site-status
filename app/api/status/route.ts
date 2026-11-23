@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { overrideCdnServers } from '@/lib/cdn-override'
-import { fetchXrayServers, fetchServices, type ServerStatus } from '@/lib/xray'
+import { getStatusSnapshot } from '@/lib/status'
+import type { ServerStatus } from '@/lib/xray'
 
 export type { ServerStatus }
 
@@ -16,11 +16,8 @@ export interface StatusResponse {
 
 export async function GET() {
   try {
-    const [servers, services] = await Promise.all([
-      fetchXrayServers({ next: { revalidate: 60 } }),
-      fetchServices(),
-    ])
-    await overrideCdnServers(servers)
+    // Shared 30 s snapshot (src/lib/status.ts) — the page renders from the same one.
+    const { servers, services, checkedAt } = await getStatusSnapshot()
     const online = servers.filter((s) => s.alive).length
 
     const body: StatusResponse = {
@@ -28,7 +25,7 @@ export async function GET() {
       total: servers.length,
       servers,
       services,
-      checkedAt: new Date().toISOString(),
+      checkedAt: new Date(checkedAt).toISOString(),
     }
 
     return NextResponse.json(body, {

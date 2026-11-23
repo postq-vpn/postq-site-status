@@ -74,8 +74,10 @@ export default function RdHeader() {
     }
   }, [usefulOpen])
 
+  // transform-gpu pins the bar to its own permanent layer, so it isn't
+  // repainted along with the page underneath on scroll or re-render.
   return (
-    <header className="fixed inset-x-0 top-3 z-50 px-2 sm:px-4 lg:top-7">
+    <header className="fixed inset-x-0 top-3 z-50 transform-gpu px-2 sm:px-4 lg:top-7">
       {/* On phones the bar splits in two: the logo and the menu button are
           separate pills (RD_PILL), and the shared background below is hidden. */}
       <div className="relative isolate mx-auto max-w-[1472px] sm:p-4">
@@ -111,12 +113,14 @@ export default function RdHeader() {
                     background (-z-20 vs -z-10), so it slides out from under it.
                     The slide stays on this wrapper and the fade on the panel itself:
                     an ancestor with opacity < 1 cuts the panel's backdrop blur off
-                    from the page, so it showed see-through until the fade ended. */}
+                    from the page, so it showed see-through until the fade ended.
+                    Once faded out it also goes visibility: hidden, so the browser
+                    stops re-blurring an invisible panel on every scroll frame. */}
                 <div
                   inert={!usefulOpen}
                   className={`absolute left-1/2 top-full -z-20 -translate-x-1/2 pt-8 transition-[translate] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${usefulOpen ? 'translate-y-0' : 'pointer-events-none -translate-y-4'}`}
                 >
-                  <div className={`flex min-w-[220px] flex-col gap-1 rounded-[20px] p-2 bg-[var(--rd-menu-bg)] ${RD_GLASS} transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${usefulOpen ? 'opacity-100' : 'opacity-0'}`}>
+                  <div className={`flex min-w-[220px] flex-col gap-1 rounded-[20px] p-2 bg-[var(--rd-menu-bg)] ${RD_GLASS} transition-[opacity,visibility] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${usefulOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}>
                     {USEFUL.map(item => (
                       <Link key={item.href} href={item.href} onClick={() => setUsefulOpen(false)} className="rounded-[12px] px-4 py-3 text-[16px] text-[var(--rd-heading)] transition-colors hover:bg-[var(--rd-icon-btn)]">
                         {item.label}

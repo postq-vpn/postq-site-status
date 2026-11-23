@@ -23,8 +23,8 @@ export default function ServerGroup({ baseName, servers, history }: ServerGroupP
       label={<ServerLabel name={baseName} />}
       status={<StatusBadge tone={tone}>{online}/{total} онлайн</StatusBadge>}
     >
-      {servers.map((s, i) => (
-        <UptimeBar key={i} subdomain={s.subdomain} alive={s.alive} history={history[s.name] ?? []} />
+      {servers.map(s => (
+        <UptimeBar key={s.name} subdomain={s.subdomain} alive={s.alive} history={history[s.name] ?? []} />
       ))}
     </StatusRow>
   )

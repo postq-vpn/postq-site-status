@@ -14,6 +14,9 @@ interface Props {
  *  optional history panel that expands like the site's FAQ. */
 export default function StatusRow({ label, status, children }: Props) {
   const [open, setOpen] = useState(false)
+  // The panel's content (90-day bars) is only built on first open, then kept
+  // so closing still animates. Keeps ~1,500 hidden segments out of the DOM.
+  const [mounted, setMounted] = useState(false)
   const panelId = useId()
   const expandable = Boolean(children)
 
@@ -42,14 +45,14 @@ export default function StatusRow({ label, status, children }: Props) {
         type="button"
         aria-expanded={open}
         aria-controls={panelId}
-        onClick={() => setOpen(v => !v)}
+        onClick={() => { setMounted(true); setOpen(v => !v) }}
         className="flex w-full cursor-pointer items-center gap-4 px-5 py-5 text-left focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--rd-action)] sm:px-6"
       >
         {head}
       </button>
       <div id={panelId} role="region" inert={!open} className="rd-faq-panel" data-open={open}>
         <div className="rd-faq-panel__inner">
-          <div className="flex flex-col gap-5 px-5 pb-6 sm:px-6">{children}</div>
+          {mounted && <div className="flex flex-col gap-5 px-5 pb-6 sm:px-6">{children}</div>}
         </div>
       </div>
     </div>

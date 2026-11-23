@@ -88,14 +88,14 @@ export async function fetchServices(): Promise<ServerStatus[]> {
       protocol: 'WWW',
       alive: websiteResult.status === 'fulfilled' && websiteResult.value.alive,
       latency: websiteResult.status === 'fulfilled' ? websiteResult.value.latency : 0,
-      subdomain: '',
+      subdomain: 'web',
     },
     {
       name: '🤖 Бот',
       protocol: 'TG',
       alive: botResult.status === 'fulfilled' && botResult.value.alive,
       latency: botResult.status === 'fulfilled' ? botResult.value.latency : 0,
-      subdomain: '',
+      subdomain: 'bot',
     },
   ]
 }

@@ -1,8 +1,37 @@
-import { Bot, Globe, type LucideIcon } from 'lucide-react'
+import type { ComponentType } from 'react'
+
+type IconProps = { size?: number; className?: string }
+
+/* Solid versions of the globe / bot marks. The cut-out lines are painted in the
+   card colour (--rd-surface), so they read as holes in both themes. */
+function GlobeFilled({ size = 20, className }: IconProps) {
+  return (
+    <svg aria-hidden width={size} height={size} viewBox="0 0 24 24" className={className}>
+      <circle cx="12" cy="12" r="10" fill="currentColor" />
+      <g fill="none" stroke="var(--rd-surface)" strokeWidth="1.6" strokeLinecap="round">
+        <path d="M2.5 12h19" />
+        <path d="M12 2.5a14.5 14.5 0 0 1 3.8 9.5 14.5 14.5 0 0 1-3.8 9.5 14.5 14.5 0 0 1-3.8-9.5A14.5 14.5 0 0 1 12 2.5z" />
+      </g>
+    </svg>
+  )
+}
+
+function BotFilled({ size = 20, className }: IconProps) {
+  return (
+    <svg aria-hidden width={size} height={size} viewBox="0 0 24 24" className={className}>
+      <path d="M12 8V4H8M2 14h2M20 14h2" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="4" y="8" width="16" height="12" rx="3" fill="currentColor" />
+      <rect x="8" y="12" width="2.4" height="4" rx="1.2" fill="var(--rd-surface)" />
+      <rect x="13.6" y="12" width="2.4" height="4" rx="1.2" fill="var(--rd-surface)" />
+    </svg>
+  )
+}
+
+type LucideIcon = ComponentType<IconProps>
 
 const EMOJI_ICONS: Partial<Record<number, LucideIcon>> = {
-  0x1F310: Globe, // 🌐
-  0x1F916: Bot,   // 🤖
+  0x1F310: GlobeFilled, // 🌐
+  0x1F916: BotFilled,   // 🤖
 }
 
 export type NamePrefix =
@@ -41,16 +70,27 @@ export default function ServerLabel({ name, suffix }: { name: string; suffix?: s
   return (
     <span className="flex min-w-0 items-center gap-3">
       {prefix.type === 'flag' && (
-        <img
-          src={`https://flagcdn.com/24x18/${prefix.code}.png`}
-          srcSet={`https://flagcdn.com/48x36/${prefix.code}.png 2x`}
-          width={24}
-          height={18}
-          alt={prefix.code.toUpperCase()}
-          className="block shrink-0 rounded-[3px]"
-        />
+        // SVG flags are sharp at any pixel density; object-cover crops every
+        // country's own proportions (DE 5:3, PL 8:5, …) into one 4:3 tile, and
+        // the inset ring keeps white edges (FI, PL) from melting into the card.
+        <span className="relative block h-[18px] w-6 shrink-0 overflow-hidden rounded-[3px] after:absolute after:inset-0 after:rounded-[3px] after:shadow-[inset_0_0_0_1px_rgb(0_0_0/0.12)] after:content-['']">
+          <img
+            src={`https://flagcdn.com/${prefix.code}.svg`}
+            width={24}
+            height={18}
+            alt={prefix.code.toUpperCase()}
+            decoding="async"
+            className="block size-full object-cover"
+          />
+        </span>
       )}
-      {prefix.type === 'icon' && <prefix.Icon size={20} className="shrink-0 text-[var(--rd-placeholder)]" />}
+      {/* Same 24px column as the flags, so names line up; at 24px the round
+          mark (a 20px circle in a 24px box) weighs the same as a 24×18 flag. */}
+      {prefix.type === 'icon' && (
+        <span className="flex h-[18px] w-6 shrink-0 items-center justify-center text-[var(--rd-caption)]">
+          <prefix.Icon size={24} className="shrink-0" />
+        </span>
+      )}
       <span className="truncate">
         {prefix.cleanName}
         {suffix && <span className="uppercase text-[var(--rd-caption)]"> {suffix}</span>}
